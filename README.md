@@ -14,12 +14,12 @@ More specifically, the contextual perception module comprises the following elem
 </p>
 
 ## TODO 📝
-- [x] Release EMO-Emilia test set
+- [x] Release Emo-Emilia test set
 - [ ] Release pretrained model
 - [ ] Release Inference pipeline
 - [ ] More to be added
 
-### The EMO-Emilia Dataset
+### The Emo-Emilia Dataset
 
 To overcome the limitations of existing SER datasets—inconsistent quality, low diversity, and lack of real-world authenticity—we introduce a new SER test set, **Emo-Emilia**. 
 Specifically, we apply the automated labeling approach to annotate Emilia, a large-scale multilingual and diverse speech generation resource with over 100,000 hours of speech data that captures a wide range of emotional contexts.
@@ -27,7 +27,7 @@ We then manually verify the accuracy of the emotion labels. Each utterance is ch
 
 The original Emilia dataset can be accessed here [Emilia](https://emilia-dataset.github.io/Emilia-Demo-Page/).
 
-EMO-Emilia Dataset files: './EMO-Emilia/EMO-Emilia-ALL.jsonl'
+Emo-Emilia Dataset files: './Emo-Emilia/Emo-Emilia-ALL.jsonl'
 
 
 
