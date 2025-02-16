@@ -1,9 +1,9 @@
 import json
 
 # 输入文件路径
-input_file = "/home/work_nfs9/zxzhao/workspace/C2SER/EMO-Emilia/EMO-Emilia-ALL.jsonl"
+input_file = "./EMO-Emilia/EMO-Emilia-ALL.jsonl"
 # 输出文件路径
-output_file = "/home/work_nfs9/zxzhao/workspace/C2SER/EMO-Emilia/EMO-Emilia-ALL_new.jsonl"
+output_file = "./EMO-Emilia/EMO-Emilia-ALL_new.jsonl"
 
 # 打开输入文件并逐行读取 JSON 对象
 with open(input_file, 'r', encoding='utf-8') as infile, open(output_file, 'w', encoding='utf-8') as outfile:
