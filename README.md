@@ -1,11 +1,11 @@
-# Steering Language Model to Stable Speech Emotion Recognition via Contextual Perception and Chain of Thought <br> <sub> The official implementation of C$^2$SER (submit to ACL 2025) </sub>
+# Steering Language Model to Stable Speech Emotion Recognition via Contextual Perception and Chain of Thought <br> <sub> The official implementation of C<sup>2</sup>SER (submit to ACL 2025) </sub>
 
 ## Abstract
-We propose C$^2$SER, a novel ALM designed to enhance the stability and accuracy of SER through $\textbf{C}$ontextual perception and $\textbf{C}$hain of Thought (CoT). C$^2$SER integrates the Whisper encoder for semantic perception and Emotion2Vec-S for acoustic perception, where Emotion2Vec-S extends Emotion2Vec with semi-supervised learning to enhance emotional discrimination. Additionally, C$^2$SER employs a CoT approach, processing SER in a step-by-step manner while leveraging speech content and speaking styles to improve recognition. To further enhance stability, C$^2$SER introduces self-distillation from explicit CoT to implicit CoT, mitigating error accumulation and boosting recognition accuracy. Extensive experiments show that C$^2$SER outperforms existing popular ALMs, such as Qwen2-Audio and SECap, delivering more stable and precise emotion recognition.
+We propose C<sup>2</sup>SER, a novel ALM designed to enhance the stability and accuracy of SER through **C**ontextual perception and **C**hain of Thought (CoT). C<sup>2</sup>SER integrates the Whisper encoder for semantic perception and Emotion2Vec-S for acoustic perception, where Emotion2Vec-S extends Emotion2Vec with semi-supervised learning to enhance emotional discrimination. Additionally, C<sup>2</sup>SER employs a CoT approach, processing SER in a step-by-step manner while leveraging speech content and speaking styles to improve recognition. To further enhance stability, C<sup>2</sup>SER introduces self-distillation from explicit CoT to implicit CoT, mitigating error accumulation and boosting recognition accuracy. Extensive experiments show that C<sup>2</sup>SER outperforms existing popular ALMs, such as Qwen2-Audio and SECap, delivering more stable and precise emotion recognition.
 
 ## Roadmap
 
-C$^2$SER is designed to mitigate hallucinations in speech emotion recognition (SER) and to deliver stable emotion recognition. C$^2$SER architecture consists of two primary components: a contextual perception module and a text-based large language model (LLM). The contextual perception module extracts detailed information regarding both the semantic and acoustic aspects, which the text LLM subsequently leverages via a chain-of-thought process to make final predictions.
+C<sup>2</sup>SER is designed to mitigate hallucinations in speech emotion recognition (SER) and to deliver stable emotion recognition. C<sup>2</sup>SER architecture consists of two primary components: a contextual perception module and a text-based large language model (LLM). The contextual perception module extracts detailed information regarding both the semantic and acoustic aspects, which the text LLM subsequently leverages via a chain-of-thought process to make final predictions.
 
 More specifically, the contextual perception module comprises the following elements: a Whispe encoder for semantic perception, Emotion2Vec-S for acoustic perception, and a connection model designed to align the feature dimensions with those required by the text LLM.
 
@@ -31,7 +31,7 @@ EMO-Emilia Dataset files: './EMO-Emilia/EMO-Emilia-ALL.jsonl'
 
 
 
-### C$^2$SER
+### C<sup>2</sup>SER
 
 The training pipline will coming soon!
 
