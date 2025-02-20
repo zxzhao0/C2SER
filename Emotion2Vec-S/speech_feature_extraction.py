@@ -84,7 +84,7 @@ if __name__ == '__main__':
     # load models
     my_model_path = UserDirModule(args.model_dir)
     fairseq.utils.import_user_module(my_model_path)
-    model, cfg, task = fairseq.checkpoint_utils.load_model_ensemble_and_task([args.model_path]) # 这里考虑到模型ema的问题，使用strict
+    model, cfg, task = fairseq.checkpoint_utils.load_model_ensemble_and_task([args.model_path])
     model = model[0]
     model.to(args.device)
 

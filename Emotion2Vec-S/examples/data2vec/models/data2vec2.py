@@ -17,12 +17,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributed as dist
 
-from fairseq.modules import EMAModule, EMAModuleConfig
-
 from fairseq.dataclass import FairseqDataclass
 from fairseq.models import BaseFairseqModel, register_model
 
-from ..data.modality import Modality
+# from ..data.modality import Modality
 
 from .modalities.base import (
     MaskSeed,
@@ -40,6 +38,15 @@ from .modalities.audio import (
     D2vAudioConfig,
     AudioEncoder,
 )
+
+
+from enum import Enum, auto
+
+
+class Modality(Enum):
+    AUDIO = auto()
+    IMAGE = auto()
+    TEXT = auto()
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +135,7 @@ class Data2VecMultiConfig(FairseqDataclass):
 
     seed: int = II("common.seed")
 
-    skip_ema: bool = False
+    skip_ema: bool = True
 
     cls_loss: float = 1
     recon_loss: float = 0
@@ -150,12 +157,14 @@ class Data2VecMultiModel(BaseFairseqModel):
         alibi_biases,
         task,
     ) -> ModalitySpecificEncoder:
-        if cfg.type == Modality.AUDIO:
-            enc_cls = AudioEncoder
-            if hasattr(task, "text_task"):
-                task = task.text_task
-        else:
-            raise Exception(f"unsupported modality {cfg.type}")
+        print(cfg)
+        enc_cls = AudioEncoder
+        # if cfg.type == Modality.AUDIO:
+        #     enc_cls = AudioEncoder
+        #     if hasattr(task, "text_task"):
+        #         task = task.text_task
+        # else:
+        #     raise Exception(f"unsupported modality {cfg.type}")
 
         return enc_cls(
             cfg,
@@ -234,20 +243,6 @@ class Data2VecMultiModel(BaseFairseqModel):
         for mod_enc in self.modality_encoders.values():
             mod_enc.reset_parameters()
 
-        if not skip_ema:
-            self.ema = self.make_ema_teacher(cfg.ema_decay)
-            self.shared_decoder = (
-                Decoder1d(cfg.shared_decoder, cfg.embed_dim)
-                if self.cfg.shared_decoder is not None
-                else None
-            )
-            if self.shared_decoder is not None:
-                self.shared_decoder.apply(self._init_weights)
-
-            self.recon_proj = None
-            if cfg.recon_loss > 0:
-                self.recon_proj = nn.Linear(cfg.embed_dim, cfg.embed_dim)
-
         for pn, p in self.named_parameters():
             if len(p.shape) == 1 or pn.endswith(".bias") or "alibi_scale" in pn:
                 p.optim_overrides = {"optimizer": {"weight_decay_scale": 0}}
@@ -255,19 +250,6 @@ class Data2VecMultiModel(BaseFairseqModel):
                 p.param_group = "decoder"
 
         self.num_updates = 0
-
-        # self.proj = nn.Linear(768, 9) # 修改线性层为3层
-        self._fixed1_linear_projection = nn.Sequential(
-            nn.Linear(cfg.embed_dim, cfg.embed_dim),
-            nn.Dropout(p=0.5)
-        )
-        self._fixed2_linear_projection = nn.Sequential(
-            nn.Linear(cfg.embed_dim, cfg.embed_dim//2),
-            nn.Dropout(p=0.5)
-        )
-        self._fixed3_linear_projection = nn.Sequential(
-            nn.Linear(cfg.embed_dim//2, 9)
-        )
 
     def _init_weights(self, m):
 
@@ -287,82 +269,6 @@ class Data2VecMultiModel(BaseFairseqModel):
                 nn.init.constant_(m.bias, 0)
             if m.weight is not None:
                 nn.init.constant_(m.weight, 1.0)
-
-    @torch.no_grad()
-    def make_ema_teacher(self, ema_decay):
-        ema_config = EMAModuleConfig(
-            ema_decay=ema_decay,
-            ema_fp32=True,
-            log_norms=self.cfg.log_norms,
-            add_missing_params=False,
-        )
-
-        model_copy = self.make_target_model()
-
-        return EMAModule(
-            model_copy,
-            ema_config,
-            copy_model=False,
-        )
-
-    def make_target_model(self):
-        logger.info("making target model")
-
-        model_copy = Data2VecMultiModel(
-            self.cfg, self.modalities, skip_ema=True, task=self.task
-        )
-
-        if self.cfg.ema_encoder_only:  
-            model_copy = model_copy.blocks
-            for p_s, p_t in zip(self.blocks.parameters(), model_copy.parameters()):
-                p_t.data.copy_(p_s.data)
-        else: 
-            for p_s, p_t in zip(self.parameters(), model_copy.parameters()):
-                p_t.data.copy_(p_s.data)
-
-            for mod_enc in model_copy.modality_encoders.values():
-                mod_enc.decoder = None
-                if not mod_enc.modality_cfg.ema_local_encoder:
-                    mod_enc.local_encoder = None
-                    mod_enc.project_features = None
-
-        model_copy.requires_grad_(False)  
-        return model_copy
-
-    def set_num_updates(self, num_updates):
-        super().set_num_updates(num_updates)
-
-        if self.ema is not None and (
-            (self.num_updates == 0 and num_updates > 1)
-            or self.num_updates >= num_updates
-        ):
-            pass
-        elif self.training and self.ema is not None:
-            ema_weight_decay = None
-            if self.cfg.ema_decay != self.cfg.ema_end_decay:
-                if num_updates >= self.cfg.ema_anneal_end_step:
-                    decay = self.cfg.ema_end_decay
-                else:
-                    decay = get_annealed_rate(
-                        self.cfg.ema_decay,
-                        self.cfg.ema_end_decay,
-                        num_updates,
-                        self.cfg.ema_anneal_end_step,
-                    )
-                self.ema.set_decay(decay, weight_decay=ema_weight_decay)
-            if self.ema.get_decay() < 1:
-                self.ema.step(self.blocks if self.cfg.ema_encoder_only else self)
-
-        self.num_updates = num_updates
-
-    def state_dict(self, destination=None, prefix="", keep_vars=False):
-        state = super().state_dict(destination, prefix, keep_vars)
-
-        return state
-
-    def _load_from_state_dict(self, state_dict, prefix, *args, **kwargs):
-
-        return super()._load_from_state_dict(state_dict, prefix, *args, **kwargs)
 
     @classmethod
     def build_model(cls, cfg: Data2VecMultiConfig, task=None):
