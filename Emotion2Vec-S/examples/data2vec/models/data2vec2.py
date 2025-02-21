@@ -39,9 +39,7 @@ from .modalities.audio import (
     AudioEncoder,
 )
 
-
 from enum import Enum, auto
-
 
 class Modality(Enum):
     AUDIO = auto()
@@ -49,7 +47,6 @@ class Modality(Enum):
     TEXT = auto()
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class D2vModalitiesConfig(FairseqDataclass):
