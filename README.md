@@ -143,7 +143,6 @@ done
 wait
 echo "All training tasks completed."
 ```
-
 ## C<sup>2</sup>SER
 
 The training pipline will coming soon!
