@@ -2,7 +2,7 @@
 <!-- <br> <sub> The official implementation of C<sup>2</sup>SER (submit to ACL 2025) </sub> -->
 
 ## Abstract
-We propose C<sup>2</sup>SER, a novel ALM designed to enhance the stability and accuracy of SER through **C**ontextual perception and **C**hain of Thought (CoT). C<sup>2</sup>SER integrates the Whisper encoder for semantic perception and Emotion2Vec-S for acoustic perception, where Emotion2Vec-S extends Emotion2Vec with semi-supervised learning to enhance emotional discrimination. Additionally, C<sup>2</sup>SER employs a CoT approach, processing SER in a step-by-step manner while leveraging speech content and speaking styles to improve recognition. To further enhance stability, C<sup>2</sup>SER introduces self-distillation from explicit CoT to implicit CoT, mitigating error accumulation and boosting recognition accuracy. Extensive experiments show that C<sup>2</sup>SER outperforms existing popular ALMs, such as Qwen2-Audio and SECap, delivering more stable and precise emotion recognition.
+We propose C<sup>2</sup>SER, a novel ALM designed to enhance the stability and accuracy of speech emotion recognition (SER) through **C**ontextual perception and **C**hain of Thought (CoT). C<sup>2</sup>SER integrates the Whisper encoder for semantic perception and Emotion2Vec-S for acoustic perception, where Emotion2Vec-S extends Emotion2Vec with semi-supervised learning to enhance emotional discrimination. Additionally, C<sup>2</sup>SER employs a CoT approach, processing SER in a step-by-step manner while leveraging speech content and speaking styles to improve recognition. To further enhance stability, C<sup>2</sup>SER introduces self-distillation from explicit CoT to implicit CoT, mitigating error accumulation and boosting recognition accuracy. Extensive experiments show that C<sup>2</sup>SER outperforms existing popular ALMs, such as Qwen2-Audio and SECap, delivering more stable and precise emotion recognition.
 
 ## Roadmap
 
@@ -59,35 +59,103 @@ pip install --editable ./
 ### 1. Feature Extraction
 
 You can download the pre-trained [Emotion2vec-S model](https://drive.google.com/drive/folders/1LWWi6bahzn7fJP4fCgPleOyQ30sD_BWO?usp=drive_link) and put it in the "C2SER/Emotion2Vec-S/ckpt" folder. 
-Meanwhile. we have provided the pretrained checkpoints in the huggingface model hub. You can also download ckpt file from here[xxxx].
+Meanwhile. we have provided the pretrained checkpoints in the huggingface model hub. You can also download ckpt file from here[xxxx]. We also provide [here](https://drive.google.com/drive/folders/12AOVJT7I9GSLJnjHa-Elc-UKgog-mZR2) the feature files for the Emo-Emilia dataset extracted using Emotion2vec-S. 
 
-We also provide [here](https://drive.google.com/drive/folders/12AOVJT7I9GSLJnjHa-Elc-UKgog-mZR2) the feature files for the Emo-Emilia dataset extracted using Emotion2vec-S. 
+If you want to extract features using Emotion2Vec-S，, you will also need to provide a `wav.scp` file and place it in the `./Emotion2Vec-S directory`. Here is an example of the `wav.scp` file:：
+```pgsql
+audio_name1 /path/to/audio_name1.wav
+audio_name2 /path/to/audio_name2.wav
+audio_name3 /path/to/audio_name3.wav
+```
 
-If you want to extract features using Emotion2Vec-S, the following is a reference example:
+Next, you can directly run the following code to extract features：
+```python
+import torch
+import os
+import sys
+import json
+import numpy as np
+import argparse
+from tqdm import tqdm
+import torchaudio
+import torch.nn.functional as F
+import fairseq
+from dataclasses import dataclass
 
-Use the `speech_feature_extraction.py` script (refer to the official EmoBox code) to extract features from audio files. The script supports parallel processing and provides the following parameters:
+SAMPLING_RATE=16000
+
+@dataclass
+class UserDirModule:
+    user_dir: str
+
+def extract_fairseq_feature(wav_path, model, device):
+    try:
+        wav, sr = torchaudio.load(wav_path)
+        if sr != SAMPLING_RATE:
+            wav = torchaudio.functional.resample(wav, sr, SAMPLING_RATE)
+        
+        wav = wav.to(device)
+        out = model.extract_features(wav)
+        return out
+    except Exception as e:
+        print(f"Error processing audio file {wav_path}: {e}")
+        return None
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--model_path', type=str, default="./Emotion2Vec-S/ckpt/checkpoint.pt")
+    parser.add_argument('--model_dir', type=str, default="./Emotion2Vec-S/examples/data2vec/")
+    parser.add_argument('--dump_dir', type=str, default="./Emotion2Vec-S/features")
+    parser.add_argument('--device', type=str, default='cuda')
+    parser.add_argument('--data', type=str, default="./Emotion2Vec-S/wav.scp")
+    args = parser.parse_args()
+
+    data = {}
+    with open(args.data, 'r') as f:
+        for line in f:
+            seg_id, wav_path = line.strip().split(maxsplit=1)
+            data[seg_id] = wav_path
+    
+    seg_ids = data.keys()
+    print(f'Loaded {len(seg_ids)} audio entries')
+    # load models
+    my_model_path = UserDirModule(args.model_dir)
+    fairseq.utils.import_user_module(my_model_path)
+    model, cfg, task = fairseq.checkpoint_utils.load_model_ensemble_and_task([args.model_path])
+    model = model[0].to(args.device)
+    
+    for seg_id in tqdm(seg_ids):
+
+        wav_path = data[seg_id]
+        if not os.path.exists(wav_path):
+            print(f"WARNING: {wav_path} does not exist")
+            continue        
+        try:
+            torchaudio.load(wav_path)
+        except:
+            print(f'ERROR: Failed to load {wav_path}')
+            continue       
+
+        feat = extract_fairseq_feature(wav_path, model, args.device)
+
+        if feat is not None:
+            feat = feat['x'].cpu().detach().numpy()[0]
+            save_path = os.path.join(args.dump_dir, f"{seg_id}.npy")
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            np.save(save_path, feat)
+            print(f"Processed: {seg_id} | Shape: {feat.shape} | Saved to: {save_path}")
+        else:
+            print(f"Skipped problematic file: {seg_id}")
+```
+
+Alternatively, you can adjust the code according to your needs. The code path is `./Emotion2Vec-S/speech_feature_extraction.py`. You can also use the `./Emotion2Vec-S/extract_feature.sh` script to batch process features for multiple datasets. The script supports parallel processing and offers the following parameters:
 
 - `--model_path`: Path to the checkpoint file
 - `--model_dir`: Path to the model
 - `--dump_dir`: Directory to save extracted features
 - `--device`: Device to run the model on (e.g., 'cuda:0')
 - `--data`: Path to the dataset JSON file
-
-```bash
-datasets=("m3ed")  # Add dataset names to this array e.g., iempcap
-
-for dataset in "${datasets[@]}"; do
-    echo "Processing dataset: $dataset"
-    python3 speech_feature_extraction.py \
-        --model_path C2SER/Emotion2Vec-S/ckpt/checkpoint.pt \
-        --model_dir C2SER/Emotion2Vec-S/examples/data2vec/ \
-        --dump_dir C2SER/Emotion2Vec-S/dump_${dataset}-S \
-        --device cuda \
-        --data C2SER/Emotion2Vec-S/${dataset}/${dataset}.json 
-done
-
-echo "All datasets processed successfully."
-```
 
 ### 2. Training and testing on EmoBox using extracted features
 
