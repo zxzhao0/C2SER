@@ -58,10 +58,10 @@ pip install --editable ./
 
 ### 1. Feature Extraction
 
-You can download the pre-trained [Emotion2vec-S model](https://drive.google.com/drive/folders/1LWWi6bahzn7fJP4fCgPleOyQ30sD_BWO?usp=drive_link) and put it in the "C2SER/Emotion2Vec-S/ckpt" folder. 
+You can download the pre-trained [Emotion2vec-S model](https://drive.google.com/drive/folders/1LWWi6bahzn7fJP4fCgPleOyQ30sD_BWO?usp=drive_link) and put it in the `./Emotion2Vec-S/ckpt` folder. 
 Meanwhile. we have provided the pretrained checkpoints in the huggingface model hub. You can also download ckpt file from here[xxxx]. We also provide [here](https://drive.google.com/drive/folders/12AOVJT7I9GSLJnjHa-Elc-UKgog-mZR2) the feature files for the Emo-Emilia dataset extracted using Emotion2vec-S. 
 
-If you want to extract features using Emotion2Vec-S，, you will also need to provide a `wav.scp` file and place it in the `./Emotion2Vec-S directory`. Here is an example of the `wav.scp` file:：
+If you want to extract features using Emotion2Vec-S，you will also need to provide a `wav.scp` file and place it in the `./Emotion2Vec-S` directory. Here is an example of the `wav.scp` file:：
 ```pgsql
 audio_name1 /path/to/audio_name1.wav
 audio_name2 /path/to/audio_name2.wav
@@ -93,7 +93,7 @@ def extract_fairseq_feature(wav_path, model, device):
         wav, sr = torchaudio.load(wav_path)
         if sr != SAMPLING_RATE:
             wav = torchaudio.functional.resample(wav, sr, SAMPLING_RATE)
-        
+        wav = wav[0, :].view(1, -1)
         wav = wav.to(device)
         out = model.extract_features(wav)
         return out
@@ -155,7 +155,7 @@ Alternatively, you can adjust the code according to your needs. The code path is
 - `--model_dir`: Path to the model
 - `--dump_dir`: Directory to save extracted features
 - `--device`: Device to run the model on (e.g., 'cuda:0')
-- `--data`: Path to the dataset JSON file
+- `--data`: Path to the dataset scp file
 
 ### 2. Training and testing on EmoBox using extracted features
 
@@ -214,4 +214,4 @@ echo "All training tasks completed."
 ```
 ## C<sup>2</sup>SER
 
-The training pipline will coming soon!
+The model and inference process will be coming soon!

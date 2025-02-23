@@ -21,7 +21,7 @@ def extract_fairseq_feature(wav_path, model, device):
         wav, sr = torchaudio.load(wav_path)
         if sr != SAMPLING_RATE:
             wav = torchaudio.functional.resample(wav, sr, SAMPLING_RATE)
-        
+        wav = wav[0, :].view(1, -1)
         wav = wav.to(device)
         out = model.extract_features(wav)
         return out
@@ -58,18 +58,12 @@ if __name__ == '__main__':
         wav_path = data[seg_id]
         if not os.path.exists(wav_path):
             print(f"WARNING: {wav_path} does not exist")
-            continue
-           
+            continue 
         try:
             torchaudio.load(wav_path)
         except:
             print(f'ERROR: Failed to load {wav_path}')
-            continue       
-        try:
-            torchaudio.load(wav_path)
-        except:
-            print(f'ERROR!! wav file {wav_path} can not be loaded!')
-            continue   
+            continue         
 
         # 提取特征
         feat = extract_fairseq_feature(wav_path, model, args.device)
