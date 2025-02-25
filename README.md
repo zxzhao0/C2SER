@@ -6,7 +6,7 @@ We propose C<sup>2</sup>SER, a novel audio language model (ALM) designed to enha
 
 
 <p align="center">
-  <img src="figs/details of CSER.drawio.jpg" width="550"/>
+  <img src="figs/c2ser.png" width="550"/>
 </p>
 
 ## Roadmap 📝
@@ -56,8 +56,8 @@ pip install --editable ./
 
 ### Feature Extraction
 
-You can download the pre-trained [Emotion2vec-S model](https://drive.google.com/drive/folders/1LWWi6bahzn7fJP4fCgPleOyQ30sD_BWO?usp=drive_link) and put it in the `./Emotion2Vec-S/ckpt` folder. 
-Meanwhile，we have provided the pretrained checkpoints on the Hugging Face Model Hub. You can also download ckpt file from [here](https://huggingface.co/ASLP-lab/Emotion2Vec-S). We also provide [here](https://drive.google.com/drive/folders/12AOVJT7I9GSLJnjHa-Elc-UKgog-mZR2) the feature files for the Emo-Emilia dataset extracted using Emotion2vec-S. 
+You can download the pre-trained Emotion2vec-S model and put it in the `./Emotion2Vec-S/ckpt` folder. 
+Meanwhile，we have provided the pretrained [checkpoint.pt](https://huggingface.co/ASLP-lab/Emotion2Vec-S) on the Hugging Face Model Hub. You can also download ckpt file from [here](https://drive.google.com/drive/folders/1LWWi6bahzn7fJP4fCgPleOyQ30sD_BWO?usp=drive_link). We also provide [here](https://drive.google.com/drive/folders/12AOVJT7I9GSLJnjHa-Elc-UKgog-mZR2) the feature files for the Emo-Emilia dataset extracted using Emotion2vec-S. 
 
 If you want to extract features using Emotion2Vec-S，you will also need to provide a `wav.scp` file and place it in the `./Emotion2Vec-S` directory. Here is an example of the `wav.scp` file:：
 ```pgsql
