@@ -6,7 +6,7 @@ We propose C<sup>2</sup>SER, a novel audio language model (ALM) designed to enha
 
 
 <p align="center">
-  <img src="figs/c2ser.png" width="550"/>
+  <img src="figs/c2ser.png" width="600"/>
 </p>
 
 ## Roadmap 📝
@@ -23,11 +23,13 @@ Release pretrained checkpoint of
 
 To better simulate real-world context, we introduce a new SER test set, **Emo-Emilia**.
 Specifically, we apply the automated labeling approach to annotate Emilia, a large-scale multilingual and diverse speech generation resource with over 100,000 hours of speech data that captures a wide range of emotional contexts.
-We then manually verify the accuracy of the emotion labels. Each utterance is checked by at least two experts to ensure both accuracy and reliability. The final proposed test set, Emo-Emilia, consists of 1400 test samples, with 100 samples per emotion category across seven types in both Chinese and English (700 samples per language).
+We then manually verify the accuracy of the emotion labels. Each utterance is checked by at least two experts to ensure both accuracy and reliability. The final proposed test set, Emo-Emilia, consists of 1400 test samples, with 100 samples per emotion category across seven types (angry, happy, fearful, surprised, neutral, sad and disgusted) in both Chinese and English (700 samples per language).
 
-Emo-Emilia is a subset of Emilia dataset, to get the complete Emo-Emilia data, please get Emilia data first. The original Emilia dataset can be accessed [here](https://emilia-dataset.github.io/Emilia-Demo-Page/).
+Emo-Emilia is a subset of Emilia dataset. The original Emilia dataset can be accessed [here](https://emilia-dataset.github.io/Emilia-Demo-Page/).
 
-Emo-Emilia Dataset files: `./Emo-Emilia/Emo-Emilia-ALL.jsonl`
+You can download the Emo-Emilia data file on HuggingFace [here](https://huggingface.co/datasets/ASLP-lab/Emo-Emilia). More audio information can be found in the `./Emo-Emilia/Emo-Emilia-ALL.jsonl` file.
+
+For more information, please refer to our paper: "Steering Language Model to Stable Speech Emotion Recognition via Contextual Perception and Chain of Thought".
 
 ## Emotion2Vec-S
 
@@ -57,7 +59,7 @@ pip install --editable ./
 ### Feature Extraction
 
 You can download the pre-trained Emotion2vec-S model and put it in the `./Emotion2Vec-S/ckpt` folder. 
-Meanwhile，we have provided the pretrained [checkpoint.pt](https://huggingface.co/ASLP-lab/Emotion2Vec-S) on the Hugging Face Model Hub. You can also download ckpt file from [here](https://drive.google.com/drive/folders/1LWWi6bahzn7fJP4fCgPleOyQ30sD_BWO?usp=drive_link). We also provide [here](https://drive.google.com/drive/folders/12AOVJT7I9GSLJnjHa-Elc-UKgog-mZR2) the feature files for the Emo-Emilia dataset extracted using Emotion2vec-S. 
+Meanwhile，we have provided the pretrained [checkpoint.pt](https://huggingface.co/ASLP-lab/Emotion2Vec-S) on the HuggingFace Model Hub. You can also download ckpt file from [here](https://drive.google.com/drive/folders/1LWWi6bahzn7fJP4fCgPleOyQ30sD_BWO?usp=drive_link). We also provide [here](https://drive.google.com/drive/folders/12AOVJT7I9GSLJnjHa-Elc-UKgog-mZR2) the feature files for the Emo-Emilia dataset extracted using Emotion2vec-S. 
 
 If you want to extract features using Emotion2Vec-S，you will also need to provide a `wav.scp` file and place it in the `./Emotion2Vec-S` directory. Here is an example of the `wav.scp` file:：
 ```pgsql
@@ -227,7 +229,7 @@ echo "All training tasks completed."
 
 ### Introduction
 
-As presented in the Roadmap，C<sup>2</sup>SER employs a CoT training approach to incentivize reasoning capability. This approach decomposes the SER task into sequential steps: first perceiving speech content and speaking style, followed by emotion inference, with the assistance of prior context. This structured method imitates human thinking and reduces the possibility of hallucinations. To further enhance stability and prevent error propagation, especially in longer thought chains, C<sup>2</sup>SER introduces self-distillation, transferring knowledge from explicit to implicit CoT.
+As presented in the abstract，C<sup>2</sup>SER employs a CoT training approach to incentivize reasoning capability. This approach decomposes the SER task into sequential steps: first perceiving speech content and speaking style, followed by emotion inference, with the assistance of prior context. This structured method imitates human thinking and reduces the possibility of hallucinations. To further enhance stability and prevent error propagation, especially in longer thought chains, C<sup>2</sup>SER introduces self-distillation, transferring knowledge from explicit to implicit CoT.
 
 ### Installation
 
