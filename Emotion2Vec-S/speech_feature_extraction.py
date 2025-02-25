@@ -19,6 +19,9 @@ class UserDirModule:
 def extract_fairseq_feature(wav_path, model, device):
     try:
         wav, sr = torchaudio.load(wav_path)
+        # 合并多声道为单声道（取平均）
+        if wav.size(0) > 1:
+            wav = torch.mean(wav, dim=0, keepdim=True)
         if sr != SAMPLING_RATE:
             wav = torchaudio.functional.resample(wav, sr, SAMPLING_RATE)
         wav = wav[0, :].view(1, -1)
@@ -32,11 +35,12 @@ def extract_fairseq_feature(wav_path, model, device):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_path', type=str, default="./Emotion2Vec-S/ckpt/checkpoint.pt", help="Path to the model checkpoint file")
+    parser.add_argument('--model_path', type=str, default="/home/work_nfs15/sywang/work_space/fairseq/1_public/checkpoint.pt", help="Path to the model checkpoint file")
     parser.add_argument('--model_dir', type=str, default="./Emotion2Vec-S/examples/data2vec/", help="Path to the model directory")
-    parser.add_argument('--dump_dir', type=str, default="./Emotion2Vec-S/features", help="Directory to save extracted features")
+    parser.add_argument('--dump_dir', type=str, default="./features_frm", help="Directory to save extracted features")
     parser.add_argument('--device', type=str, default='cuda', help="Device to use for computation (e.g., 'cuda' or 'cpu')")
     parser.add_argument('--data', type=str, default="./Emotion2Vec-S/wav.scp", help="Path to the wav.scp file containing audio paths")
+    parser.add_argument('--level', type=str, default="frame", help="frame or utterance")
     args = parser.parse_args()
 
     data = {}
@@ -44,7 +48,9 @@ if __name__ == '__main__':
         for line in f:
             seg_id, wav_path = line.strip().split(maxsplit=1)
             data[seg_id] = wav_path
-    
+
+    os.makedirs(args.dump_dir, exist_ok=True)
+
     seg_ids = data.keys()
     print(f'Loaded {len(seg_ids)} audio entries')
     # load models
@@ -70,7 +76,13 @@ if __name__ == '__main__':
 
         if feat is not None:
             # 处理特征输出
-            feat = feat['x'].cpu().detach().numpy()[0]  # 去掉batch维度
+            if args.level == 'frame':
+                feat = feat['x'].cpu().detach().numpy()[0]
+            elif args.level == 'utterance':
+                feat = feat['utt_x'].cpu().detach().numpy()[0] 
+            else:
+                raise ValueError("Unknown level: {}".format(args.level))            
+
             save_path = os.path.join(args.dump_dir, f"{seg_id}.npy")
             os.makedirs(os.path.dirname(save_path), exist_ok=True)
             np.save(save_path, feat)

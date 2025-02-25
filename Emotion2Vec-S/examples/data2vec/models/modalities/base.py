@@ -17,8 +17,15 @@ from typing import Optional, Callable
 from fairseq.data.data_utils import compute_mask_indices
 from fairseq.modules import GradMultiply
 from fairseq.utils import index_put
-from examples.data2vec.data.modality import Modality
 from .modules import D2vDecoderConfig
+
+from enum import Enum, auto
+
+class Modality(Enum):
+    AUDIO = auto()
+    IMAGE = auto()
+    TEXT = auto()
+
 
 logger = logging.getLogger(__name__)
 

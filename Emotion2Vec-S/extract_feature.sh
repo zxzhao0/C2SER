@@ -7,5 +7,6 @@ for dataset in "${datasets[@]}"; do
         --model_dir C2SER/Emotion2Vec-S/examples/data2vec/ \
         --dump_dir C2SER/Emotion2Vec-S/fea_${dataset} \
         --device cuda \
-        --data C2SER/Emotion2Vec-S/${dataset}.scp
+        --data C2SER/Emotion2Vec-S/${dataset}.scp \
+        --level frame
 done
