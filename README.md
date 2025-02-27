@@ -1,6 +1,8 @@
 # Steering Language Model to Stable Speech Emotion Recognition via Contextual Perception and Chain of Thought
 <!-- <br> <sub> The official implementation of C<sup>2</sup>SER (submit to ACL 2025) </sub> -->
 
+C<sup>2</sup>SER: [Paper](https://arxiv.org/abs/2502.18186) | [Code](https://github.com/zxzhao0/C2SER) | [HuggingFace](https://huggingface.co/collections/ASLP-lab/c2ser-67bc735d820403e7969fe8a0)
+
 ## Abstract
 We propose C<sup>2</sup>SER, a novel audio language model (ALM) designed to enhance the stability and accuracy of speech emotion recognition (SER) through **C**ontextual perception and **C**hain of Thought (CoT). C<sup>2</sup>SER integrates the Whisper encoder for semantic perception and Emotion2Vec-S for acoustic perception, where Emotion2Vec-S extends Emotion2Vec with semi-supervised learning to enhance emotional discrimination. Additionally, C<sup>2</sup>SER employs a CoT approach, processing SER in a step-by-step manner while leveraging speech content and speaking styles to improve recognition. To further enhance stability, C<sup>2</sup>SER introduces self-distillation from explicit CoT to implicit CoT, mitigating error accumulation and boosting recognition accuracy. Extensive experiments show that C<sup>2</sup>SER outperforms existing popular ALMs, such as Qwen2-Audio and SECap, delivering more stable and precise emotion recognition.
 
