@@ -53,9 +53,8 @@ This project follows the fairseq installation process.
 To install fairseq and develop locally:
 
 ```bash
-git clone https://github.com/pytorch/fairseq
-cd fairseq
-pip install --editable ./
+pip install fairseq
+git clone https://github.com/zxzhao0/C2SER.git
 ```
 
 ### Feature Extraction
